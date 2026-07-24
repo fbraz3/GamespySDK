@@ -206,10 +206,9 @@ static GPResult gpiStartConnect(GPConnection* connection, GPIOperation* operatio
     fflush(stderr);
     rcode = connect(iconnection->cmSocket, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
     if (gsiSocketIsError(rcode)) {
-        fprintf(stderr, "[GameSpySDK] gpConnect: Connection failed with error %d\n", GOAGetLastError(iconnection->cmSocket));
-        fflush(stderr);
-    }
         int error = GOAGetLastError(iconnection->cmSocket);
+        fprintf(stderr, "[GameSpySDK] gpConnect: Connection failed with error %d\n", error);
+        fflush(stderr);
         if ((error != WSAEWOULDBLOCK) && (error != WSAEINPROGRESS) && (error != WSAETIMEDOUT)) {
             CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error connecting a socket.");
         }
