@@ -245,9 +245,14 @@ CHATBool ciSocketConnect(ciSocket* sock, const char* serverAddress, int port)
     if (ip == INADDR_NONE) {
         // Try resolving with DNS.
         //////////////////////////
+        fprintf(stderr, "[GameSpySDK] Chat: Resolving DNS for %s\n", serverAddress);
+        fflush(stderr);
         host = gethostbyname((char*)serverAddress);
-        if (host == NULL)
+        if (host == NULL) {
+            fprintf(stderr, "[GameSpySDK] Chat: Failed to resolve %s\n", serverAddress);
+            fflush(stderr);
             return CHATFalse;
+        }
 
         // Get the ip.
         //////////////

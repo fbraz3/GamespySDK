@@ -416,9 +416,14 @@ static SBError ServerListConnect(SBServerList* slist)
     saddr.sin_port = htons(MSPORT2);
     saddr.sin_addr.s_addr = inet_addr(masterHostname);
     if (saddr.sin_addr.s_addr == INADDR_NONE) {
+        fprintf(stderr, "[GameSpySDK] ServerBrowser: Resolving DNS for %s\n", masterHostname);
+        fflush(stderr);
         hent = gethostbyname(masterHostname);
-        if (!hent)
+        if (!hent) {
+            fprintf(stderr, "[GameSpySDK] ServerBrowser: Failed to resolve %s\n", masterHostname);
+            fflush(stderr);
             return sbe_dnserror;
+        }
         memcpy(&saddr.sin_addr.s_addr, hent->h_addr_list[0], sizeof(saddr.sin_addr.s_addr));
     }
 
@@ -427,7 +432,11 @@ static SBError ServerListConnect(SBServerList* slist)
         if (slist->slsocket == INVALID_SOCKET)
             return sbe_socketerror;
     }
+    fprintf(stderr, "[GameSpySDK] ServerBrowser: Connecting to %s:%d (IP: %s)\n", masterHostname, MSPORT2, inet_ntoa(saddr.sin_addr));
+    fflush(stderr);
     if (connect(slist->slsocket, (struct sockaddr*)&saddr, sizeof saddr) != 0) {
+        fprintf(stderr, "[GameSpySDK] ServerBrowser: Connection to %s failed\n", masterHostname);
+        fflush(stderr);
         closesocket(slist->slsocket);
         slist->slsocket = INVALID_SOCKET;
         return sbe_connecterror;

@@ -182,10 +182,15 @@ static GPResult gpiStartConnect(GPConnection* connection, GPIOperation* operatio
     // Get the server host.
     ///////////////////////
     if (inet_addr(GPConnectionManagerHostname) == INADDR_NONE) {
+        fprintf(stderr, "[GameSpySDK] gpConnect: Resolving DNS for %s\n", GPConnectionManagerHostname);
+        fflush(stderr);
         host = gethostbyname(GPConnectionManagerHostname);
-        if (host == NULL)
+        if (host == NULL) {
+            fprintf(stderr, "[GameSpySDK] gpConnect: Failed to resolve %s\n", GPConnectionManagerHostname);
+            fflush(stderr);
             CallbackFatalError(
                 connection, GP_NETWORK_ERROR, GP_NETWORK, "Could not resolve connection mananger host name.");
+        }
         address.sin_addr.s_addr = *(unsigned int*)host->h_addr_list[0];
         //printf("Resolved Hostname and copied address:  %s\n", inet_ntoa(address.sin_addr));
     } else {
@@ -197,8 +202,13 @@ static GPResult gpiStartConnect(GPConnection* connection, GPIOperation* operatio
     //////////////////////
     assert(address.sin_addr.s_addr != 0);
     address.sin_port = htons(GPI_CONNECTION_MANAGER_PORT);
+    fprintf(stderr, "[GameSpySDK] gpConnect: Connecting to %s:%d (IP: %s)\n", GPConnectionManagerHostname, GPI_CONNECTION_MANAGER_PORT, inet_ntoa(address.sin_addr));
+    fflush(stderr);
     rcode = connect(iconnection->cmSocket, (struct sockaddr*)&address, sizeof(struct sockaddr_in));
     if (gsiSocketIsError(rcode)) {
+        fprintf(stderr, "[GameSpySDK] gpConnect: Connection failed with error %d\n", GOAGetLastError(iconnection->cmSocket));
+        fflush(stderr);
+    }
         int error = GOAGetLastError(iconnection->cmSocket);
         if ((error != WSAEWOULDBLOCK) && (error != WSAEINPROGRESS) && (error != WSAETIMEDOUT)) {
             CallbackFatalError(connection, GP_NETWORK_ERROR, GP_NETWORK, "There was an error connecting a socket.");
