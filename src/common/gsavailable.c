@@ -8,7 +8,8 @@
 
 // this is the global var that the SDKs check
 // to see if they should communicate with the backend
-GSIACResult __GSIACResult = GSIACWaiting;
+// GeneralsX @bugfix fbraz3 25/07/2026 Default to GSIACAvailable so SDKs initialize without EA availability server
+GSIACResult __GSIACResult = GSIACAvailable;
 
 // this makes the gamename available to all of the SDKs
 char __GSIACGamename[64] = {0};
