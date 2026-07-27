@@ -620,10 +620,20 @@ PEERBool peerSetTitleA(PEER peer,
     connection->sbGameVersion = sbGameVersion;
     connection->sbMaxUpdates = sbMaxUpdates;
 
+    fprintf(stderr, "[GameSpySDK] peerSetTitle: Calling piSBInit...\n");
+    fflush(stderr);
+
     // Init SB.
     ///////////
     if (!piSBInit(peer))
+    {
+        fprintf(stderr, "[GameSpySDK] peerSetTitle: piSBInit failed!\n");
+        fflush(stderr);
         return PEERFalse;
+    }
+
+    fprintf(stderr, "[GameSpySDK] peerSetTitle: piSBInit OK\n");
+    fflush(stderr);
 
     // If we're already connected, do the connect stuff.
     ////////////////////////////////////////////////////
@@ -637,7 +647,11 @@ PEERBool peerSetTitleA(PEER peer,
     // Hosting.
     ///////////
     strcpy(connection->qrSecretKey, qrSecretKey);
+    fprintf(stderr, "[GameSpySDK] peerSetTitle: Calling piStopHosting...\n");
+    fflush(stderr);
     piStopHosting(peer, PEERTrue);
+    fprintf(stderr, "[GameSpySDK] peerSetTitle: piStopHosting OK\n");
+    fflush(stderr);
     connection->hosting = PEERFalse;
     connection->playing = PEERFalse;
     connection->natNegotiate = natNegotiate;

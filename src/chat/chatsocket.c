@@ -292,17 +292,28 @@ CHATBool ciSocketConnect(ciSocket* sock, const char* serverAddress, int port)
     rcode = bind(sock->sock, (SOCKADDR *)&localAddress, sizeof(SOCKADDR_IN));
     if(gsiSocketIsError(rcode))
     {
+        fprintf(stderr, "[GameSpySDK] Chat: Bind failed (rcode %d)\n", rcode);
+        fflush(stderr);
         closesocket(sock->sock);
         return CHATFalse;
     }
+
+    fprintf(stderr, "[GameSpySDK] Chat: Connecting TCP to %s:%d...\n", serverAddress, port);
+    fflush(stderr);
 
     // Try and connect.
     ///////////////////
     rcode = connect(sock->sock, (SOCKADDR*)&address, sizeof(SOCKADDR_IN));
     if (gsiSocketIsError(rcode)) {
+        int err = GOAGetLastError(sock->sock);
+        fprintf(stderr, "[GameSpySDK] Chat: Connect failed (rcode %d, error %d)\n", rcode, err);
+        fflush(stderr);
         closesocket(sock->sock);
         return CHATFalse;
     }
+
+    fprintf(stderr, "[GameSpySDK] Chat: Connected successfully to %s:%d!\n", serverAddress, port);
+    fflush(stderr);
 
     // We're connected.
     ///////////////////
