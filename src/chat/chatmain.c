@@ -136,7 +136,7 @@ void ciHandleDisconnect(CHAT chat, const char* reason)
 
     // If we're still connecting, let the app know the attempt failed.
     //////////////////////////////////////////////////////////////////
-    if (connection->connecting) {
+    if (connecting) {
         // Call the callback.
         /////////////////////
         if (connection->connectCallback != NULL)
