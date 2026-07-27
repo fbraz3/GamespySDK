@@ -560,6 +560,8 @@ PEERBool peerSetTitleA(PEER peer,
                        PEERBool pingRooms[NumRooms],
                        PEERBool crossPingRooms[NumRooms])
 {
+    fprintf(stderr, "[GameSpySDK] peerSetTitleA ENTRY: title=%s\n", title ? title : "NULL");
+    fflush(stderr);
     static PEERBool noPings[NumRooms];
     PEERBool pingTitleRoom = PEERFalse;
     PEERBool xpingTitleRoom = PEERFalse;

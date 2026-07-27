@@ -554,13 +554,13 @@ HOSTENT* getlocalhost(void)
     return NULL;
 
 #else
-    char hostname[256] = "";
-
-    // get the local host's name
-    gethostname(hostname, sizeof(hostname));
-
-    // return the host for that name
-    return gethostbyname(hostname);
+    struct hostent* host = gethostbyname("127.0.0.1");
+    if (!host) {
+        char hostname[256] = "";
+        gethostname(hostname, sizeof(hostname));
+        host = gethostbyname(hostname);
+    }
+    return host;
 #endif
 }
 #endif

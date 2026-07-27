@@ -393,15 +393,21 @@ GPResult gpiRecvToBuffer(GPConnection* connection,
         if (gsiSocketIsError(rcode)) {
             int error = GOAGetLastError(sock);
             if ((error != WSAEWOULDBLOCK) && (error != WSAEINPROGRESS) && (error != WSAETIMEDOUT)) {
+                fprintf(stderr, "[GameSpySDK] gpiRecvToBuffer (%s): recv error=%d\n", id, error);
+                fflush(stderr);
                 Error(connection, GP_NETWORK_ERROR, "There was an error reading from a socket.");
             }
         } else if (rcode == 0) {
             // Check for a closed connection.
             /////////////////////////////////
             closed = GPITrue;
+            fprintf(stderr, "[GameSpySDK] gpiRecvToBuffer (%s): Connection closed by server\n", id);
+            fflush(stderr);
             gsDebugFormat(
                 GSIDebugCat_GP, GSIDebugType_Network, GSIDebugLevel_Comment, "RECVXXXX(%s): Connection closed\n", id);
         } else {
+            fprintf(stderr, "[GameSpySDK] gpiRecvToBuffer (%s): received %d bytes: %.*s\n", id, rcode, rcode, &buffer[len]);
+            fflush(stderr);
 #if defined(GPI_DUMP_NET_TRAFFIC) && defined(GSI_COMMON_DEBUG)
             {
                 static int recvCount;

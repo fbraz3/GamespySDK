@@ -512,6 +512,8 @@ static GPResult gpiSendNewuser(GPConnection* connection, GPIConnectData* data)
 
 GPResult gpiProcessConnect(GPConnection* connection, GPIOperation* operation, const char* input)
 {
+    fprintf(stderr, "[GameSpySDK] gpiProcessConnect: state=%d, input=%s\n", operation->state, input);
+    fflush(stderr);
     char buffer[512];
     char check[33];
     char uniquenick[GP_UNIQUENICK_LEN];
