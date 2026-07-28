@@ -979,6 +979,8 @@ void piSBThink(PEER peer)
     if (!connection->sbInitialized)
         return;
 
+
+
     SBListThink(&connection->gameList);
     SBListThink(&connection->groupList);
     SBQueryEngineThink(&connection->gameEngine);

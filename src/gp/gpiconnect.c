@@ -623,10 +623,16 @@ GPResult gpiProcessConnect(GPConnection* connection, GPIOperation* operation, co
         break;
 
     case GPI_LOGIN:
+        fprintf(stderr, "[GameSpySDK] gpiProcessConnect: Processing GPI_LOGIN (input len=%zu, input=%s)\n", strlen(input), input);
+        fflush(stderr);
         // This should be \lc\2.
         ////////////////////////
         if (strncmp(input, "\\lc\\2", 5) != 0)
+        {
+            fprintf(stderr, "[GameSpySDK] gpiProcessConnect ERROR: Expected \\lc\\2, got %s\n", input);
+            fflush(stderr);
             CallbackFatalError(connection, GP_NETWORK_ERROR, GP_PARSE, "Unexpected data was received from the server.");
+        }
 
         // Get the sesskey.
         ///////////////////
@@ -699,8 +705,15 @@ GPResult gpiProcessConnect(GPConnection* connection, GPIOperation* operation, co
         // Check the server authentication.
         ///////////////////////////////////
         if (memcmp(check, buffer, 32) != 0)
+        {
+            fprintf(stderr, "[GameSpySDK] gpiProcessConnect ERROR: Server auth proof check failed!\n");
+            fflush(stderr);
             CallbackFatalError(
                 connection, GP_NETWORK_ERROR, GP_LOGIN_SERVER_AUTH_FAILED, "Could not authenticate server.");
+        }
+
+        fprintf(stderr, "[GameSpySDK] gpiProcessConnect: Login & Proof OK! Setting GPI_CONNECTED and adding connect callback for profile %d\n", iconnection->profileid);
+        fflush(stderr);
 
         // Add the local profile to the list.
         /////////////////////////////////////

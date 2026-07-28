@@ -85,6 +85,8 @@ static CHATBool ciProcessServerMessage(CHAT chat, const ciServerMessage* message
     int i;
 
     assert(message != NULL);
+    fprintf(stderr, "[GameSpySDK] Chat rx msg command: '%s', numParams: %d\n", message->command, message->numParams);
+    fflush(stderr);
 
     // Figure out what type of message this is.
     ///////////////////////////////////////////

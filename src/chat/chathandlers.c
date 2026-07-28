@@ -4074,8 +4074,11 @@ void ciRplWelcomeHandler(CHAT chat, const ciServerMessage* message)
     OutputDebugString("ciRplWelcomeHandler called\n");
 #endif
 
-    assert(message->numParams == 2);
-    if (message->numParams != 2)
+    fprintf(stderr, "[GameSpySDK] ciRplWelcomeHandler chamado! numParams=%d, nick=%s\n",
+        message->numParams, message->numParams > 0 ? message->params[0] : "null");
+    fflush(stderr);
+
+    if (message->numParams < 1)
         return;
 
     nick = message->params[0];

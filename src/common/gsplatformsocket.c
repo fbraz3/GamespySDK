@@ -263,10 +263,13 @@ int GSISocketSelect(SOCKET theSocket, int* theReadFlag, int* theWriteFlag, int* 
     aResult = socketselect(FD_SETSIZE, aReadFds, aWriteFds, aExceptFds, &aTimeout);
 #else
     // Perform the select
-    aResult = select(FD_SETSIZE, aReadFds, aWriteFds, aExceptFds, &aTimeout);
+    aResult = select((int)(theSocket + 1), aReadFds, aWriteFds, aExceptFds, &aTimeout);
 #endif
-    if (gsiSocketIsError(aResult))
+    if (gsiSocketIsError(aResult)) {
+        fprintf(stderr, "[GameSpySDK] GSISocketSelect: select(socket=%d) returned error %d (errno=%d)\n", (int)theSocket, aResult, errno);
+        fflush(stderr);
         return -1;
+    }
 
 // 04-13-2005, Saad Nader
 // Added case for SN Systems that would

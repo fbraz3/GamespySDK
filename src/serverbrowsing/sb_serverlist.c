@@ -375,6 +375,8 @@ void SBServerListInit(SBServerList* slist,
 static void ErrorDisconnect(SBServerList* slist)
 {
     static char* QUERY_ERROR = "Query Error: ";
+    fprintf(stderr, "[GameSpySDK] ServerBrowser ErrorDisconnect called for socket %d (state=%d)\n", (int)slist->slsocket, slist->state);
+    fflush(stderr);
 
     // check to see if there is a Query Error string in the inbuffer
     if ((slist->inbufferlen > 0) && ((unsigned int)slist->inbufferlen > strlen(QUERY_ERROR))
@@ -434,13 +436,20 @@ static SBError ServerListConnect(SBServerList* slist)
     }
     fprintf(stderr, "[GameSpySDK] ServerBrowser: Connecting to %s:%d (IP: %s)\n", masterHostname, MSPORT2, inet_ntoa(saddr.sin_addr));
     fflush(stderr);
-    if (connect(slist->slsocket, (struct sockaddr*)&saddr, sizeof saddr) != 0) {
-        fprintf(stderr, "[GameSpySDK] ServerBrowser: Connection to %s failed\n", masterHostname);
+    int connRes = connect(slist->slsocket, (struct sockaddr*)&saddr, sizeof saddr);
+    fprintf(stderr, "[GameSpySDK] ServerBrowser: connect() returned %d (errno=%d)\n", connRes, errno);
+    fflush(stderr);
+    if (connRes != 0) {
+        fprintf(stderr, "[GameSpySDK] ServerBrowser: Connection to %s failed (errno=%d)\n", masterHostname, errno);
         fflush(stderr);
         closesocket(slist->slsocket);
         slist->slsocket = INVALID_SOCKET;
         return sbe_connecterror;
     }
+
+    SetSockBlocking(slist->slsocket, 0);
+    fprintf(stderr, "[GameSpySDK] ServerBrowser: Connected successfully to %s:%d (socket=%d, non-blocking)\n", masterHostname, MSPORT2, (int)slist->slsocket);
+    fflush(stderr);
 
     //else we are connected
     return sbe_noerror;
@@ -623,7 +632,11 @@ SBError SBServerListConnectAndQuery(SBServerList* slist,
 
     //now send!
     ret = send(slist->slsocket, outgoingRequest, requestLen, 0);
+    fprintf(stderr, "[GameSpySDK] ServerBrowser SBServerListConnectAndQuery: send(socket=%d, len=%d) returned %d (queryforgamename=%s)\n", (int)slist->slsocket, requestLen, ret, slist->queryforgamename ? slist->queryforgamename : "null");
+    fflush(stderr);
     if (ret <= 0) {
+        fprintf(stderr, "[GameSpySDK] ServerBrowser SBServerListConnectAndQuery: send failed (ret=%d)\n", ret);
+        fflush(stderr);
         SBServerListDisconnect(slist);
         return sbe_connecterror;
     }
@@ -711,9 +724,12 @@ static void FreeKeyList(SBServerList* slist)
 
 void SBServerListDisconnect(SBServerList* slist)
 {
+    fprintf(stderr, "[GameSpySDK] ServerBrowser SBServerListDisconnect called for socket %d (state=%d)\n", (int)slist->slsocket, slist->state);
+    fflush(stderr);
     if (slist->inbuffer != NULL)
         gsifree(slist->inbuffer);
     slist->inbuffer = NULL;
+    slist->inbufferlen = 0;
     slist->inbufferlen = 0;
     if (slist->slsocket != INVALID_SOCKET)
         closesocket(slist->slsocket);
@@ -1495,14 +1511,31 @@ static SBError ProcessIncomingData(SBServerList* slist)
     SBError err;
     int len;
     int oldlen;
+    int canRecv;
 
-    if (!CanReceiveOnSocket(slist->slsocket))
+    canRecv = CanReceiveOnSocket(slist->slsocket);
+    static int canRecvCount = 0;
+    //if (++canRecvCount % 30 == 1) {
+    //    fprintf(stderr, "[GameSpySDK] ProcessIncomingData: CanReceiveOnSocket(%d)=%d (state=%d)\n", (int)slist->slsocket, canRecv, slist->state);
+    //    fflush(stderr);
+    //}
+    if (!canRecv)
         return sbe_noerror;
+
+    fprintf(stderr, "[GameSpySDK] ServerBrowser ProcessIncomingData: CanReceiveOnSocket returned %d on socket %d! Reading incoming bytes...\n", canRecv, (int)slist->slsocket);
+    fflush(stderr);
+
+    fprintf(stderr, "[GameSpySDK] ServerBrowser ProcessIncomingData: CanReceiveOnSocket returned %d on socket %d\n", canRecv, (int)slist->slsocket);
+    fflush(stderr);
 
     //append to data
     oldlen = slist->inbufferlen;
     len = recv(slist->slsocket, slist->inbuffer + slist->inbufferlen, INCOMING_BUFFER_SIZE - slist->inbufferlen, 0);
+    fprintf(stderr, "[GameSpySDK] ServerBrowser ProcessIncomingData: recv returned %d bytes (socket=%d)\n", len, (int)slist->slsocket);
+    fflush(stderr);
     if (gsiSocketIsError(len) || len == 0) {
+        fprintf(stderr, "[GameSpySDK] ServerBrowser: recv error or disconnect (len=%d)\n", len);
+        fflush(stderr);
         ErrorDisconnect(slist);
         return sbe_connecterror;
     }
@@ -1697,17 +1730,31 @@ static SBError ProcessLanData(SBServerList* slist)
 
 SBError SBListThink(SBServerList* slist)
 {
+    static int unconditionalThinkCount = 0;
+    if (++unconditionalThinkCount % 30 == 1) {
+        // fprintf(stderr, "[GameSpySDK] SBListThink called (count=%d), state=%d, socket=%d\n", unconditionalThinkCount, slist->state, (int)slist->slsocket);
+        // fflush(stderr);
+    }
+
     SBFreeDeadList(slist); //free any pending deleted servers
+
+    if (slist->state != sl_disconnected)
+    {
+        static int activeThinkCount = 0;
+        if (++activeThinkCount % 30 == 1)
+        {
+            // fprintf(stderr, "[GameSpySDK] SBListThink: active state=%d, socket=%d\n", slist->state, (int)slist->slsocket);
+            // fflush(stderr);
+        }
+    }
     switch (slist->state) {
     case sl_disconnected:
         break;
     case sl_connected:
     case sl_mainlist:
         return ProcessIncomingData(slist);
-        //break;
     case sl_lanbrowse:
         return ProcessLanData(slist);
-        //break;
     }
 
     return sbe_noerror;
