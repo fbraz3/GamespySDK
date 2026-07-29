@@ -289,6 +289,9 @@ piSBGroupsListCallback(SBServerListPtr serverlist, SBListCallbackReason reason, 
         int groupID = (int)ntohl(SBServerGetPublicInetAddress(server));
         //#ifndef GSI_PEER_UNICODE
         const char* name = SBServerGetStringValueA(server, "hostname", "(No Name)");
+        if (!name || name[0] == '\0') {
+            name = SBServerGetStringValueA(server, "groupname", "(No Name)");
+        }
         int numWaiting = SBServerGetIntValueA(server, "numwaiting", 0);
         int maxWaiting = SBServerGetIntValueA(server, "maxwaiting", 0);
         int numGames = SBServerGetIntValueA(server, "numservers", 0);

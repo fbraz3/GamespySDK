@@ -943,6 +943,13 @@ static int ParseServer(SBServerList* slist, SBServer server, char* buf, int len,
                     strindex = (unsigned char)(buf[0]);
                     buf++;
                     len--;
+                    // UniSpy workaround: if strindex is out of bounds for popular values, 
+                    // the server probably omitted the 0xFF prefix for a literal string.
+                    if (strindex != 0xFF && strindex >= (unsigned char)slist->numpopularvalues) {
+                        strindex = 0xFF;
+                        buf--;
+                        len++;
+                    }
                 } else
                     strindex = 0xFF;
                 if (strindex == 0xFF) //a NTS string
