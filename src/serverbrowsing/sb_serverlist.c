@@ -418,11 +418,11 @@ static SBError ServerListConnect(SBServerList* slist)
     saddr.sin_port = htons(MSPORT2);
     saddr.sin_addr.s_addr = inet_addr(masterHostname);
     if (saddr.sin_addr.s_addr == INADDR_NONE) {
-        fprintf(stderr, "[GameSpySDK] ServerBrowser: Resolving DNS for %s\n", masterHostname);
+        fprintf(stderr, "[GameSpySDK] ServerBrowser: Resolving DNS for ***\n");
         fflush(stderr);
         hent = gethostbyname(masterHostname);
         if (!hent) {
-            fprintf(stderr, "[GameSpySDK] ServerBrowser: Failed to resolve %s\n", masterHostname);
+            fprintf(stderr, "[GameSpySDK] ServerBrowser: Failed to resolve ***\n");
             fflush(stderr);
             return sbe_dnserror;
         }
@@ -434,13 +434,13 @@ static SBError ServerListConnect(SBServerList* slist)
         if (slist->slsocket == INVALID_SOCKET)
             return sbe_socketerror;
     }
-    fprintf(stderr, "[GameSpySDK] ServerBrowser: Connecting to %s:%d (IP: %s)\n", masterHostname, MSPORT2, inet_ntoa(saddr.sin_addr));
+    fprintf(stderr, "[GameSpySDK] ServerBrowser: Connecting to ***:%d (IP: ***)\n", MSPORT2);
     fflush(stderr);
     int connRes = connect(slist->slsocket, (struct sockaddr*)&saddr, sizeof saddr);
     fprintf(stderr, "[GameSpySDK] ServerBrowser: connect() returned %d (errno=%d)\n", connRes, errno);
     fflush(stderr);
     if (connRes != 0) {
-        fprintf(stderr, "[GameSpySDK] ServerBrowser: Connection to %s failed (errno=%d)\n", masterHostname, errno);
+        fprintf(stderr, "[GameSpySDK] ServerBrowser: Connection to *** failed (errno=%d)\n", errno);
         fflush(stderr);
         closesocket(slist->slsocket);
         slist->slsocket = INVALID_SOCKET;
@@ -448,7 +448,7 @@ static SBError ServerListConnect(SBServerList* slist)
     }
 
     SetSockBlocking(slist->slsocket, 0);
-    fprintf(stderr, "[GameSpySDK] ServerBrowser: Connected successfully to %s:%d (socket=%d, non-blocking)\n", masterHostname, MSPORT2, (int)slist->slsocket);
+    fprintf(stderr, "[GameSpySDK] ServerBrowser: Connected successfully to ***:%d (socket=%d, non-blocking)\n", MSPORT2, (int)slist->slsocket);
     fflush(stderr);
 
     //else we are connected

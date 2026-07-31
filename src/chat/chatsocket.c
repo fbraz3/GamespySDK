@@ -245,11 +245,11 @@ CHATBool ciSocketConnect(ciSocket* sock, const char* serverAddress, int port)
     if (ip == INADDR_NONE) {
         // Try resolving with DNS.
         //////////////////////////
-        fprintf(stderr, "[GameSpySDK] Chat: Resolving DNS for %s\n", serverAddress);
+        fprintf(stderr, "[GameSpySDK] Chat: Resolving DNS for ***\n");
         fflush(stderr);
         host = gethostbyname((char*)serverAddress);
         if (host == NULL) {
-            fprintf(stderr, "[GameSpySDK] Chat: Failed to resolve %s\n", serverAddress);
+            fprintf(stderr, "[GameSpySDK] Chat: Failed to resolve ***\n");
             fflush(stderr);
             return CHATFalse;
         }
@@ -298,7 +298,7 @@ CHATBool ciSocketConnect(ciSocket* sock, const char* serverAddress, int port)
         return CHATFalse;
     }
 
-    fprintf(stderr, "[GameSpySDK] Chat: Connecting TCP to %s:%d...\n", serverAddress, port);
+    fprintf(stderr, "[GameSpySDK] Chat: Connecting TCP to ***:%d...\n", port);
     fflush(stderr);
 
     // Try and connect.
@@ -312,7 +312,7 @@ CHATBool ciSocketConnect(ciSocket* sock, const char* serverAddress, int port)
         return CHATFalse;
     }
 
-    fprintf(stderr, "[GameSpySDK] Chat: Connected successfully to %s:%d!\n", serverAddress, port);
+    fprintf(stderr, "[GameSpySDK] Chat: Connected successfully to ***:%d!\n", port);
     fflush(stderr);
 
     // We're connected.
