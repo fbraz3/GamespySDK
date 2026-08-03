@@ -444,7 +444,15 @@ static void ciSocketThinkRecv(ciSocket* sock)
 
         // Connection closed?
         /////////////////////
-        if (rcode <= 0) //crt -- handle remote disconnections
+        if (gsiSocketIsError(rcode)) //crt -- handle remote disconnections
+        {
+            int err = GOAGetLastError(sock->sock);
+            if (err == WSAEWOULDBLOCK || err == WSAEINPROGRESS || err == WSAETIMEDOUT)
+                return;
+            sock->connectState = ciDisconnected;
+            return;
+        }
+        else if (rcode == 0)
         {
             sock->connectState = ciDisconnected;
             return;
